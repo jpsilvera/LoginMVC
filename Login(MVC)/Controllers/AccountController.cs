@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using Login_MVC_.Models;
 using System.Data.SqlClient;
+using System.Web.Helpers;
 
 namespace Login_MVC_.Controllers
 {
@@ -12,6 +13,7 @@ namespace Login_MVC_.Controllers
     {
         SqlConnection con = new SqlConnection();
         SqlCommand com = new SqlCommand();
+        private SqlDataReader dr;
 
         // GET: Account
         [HttpGet]
@@ -22,16 +24,29 @@ namespace Login_MVC_.Controllers
 
         void connectionString()
         {
-            con.ConnectionString = "data source=SQLEXPRESS; database=WPF; integrated security=SSPI;";
+            con.ConnectionString = "data source=.\\SQLExpress; database=WPF; integrated security = SSPI;";
         }
 
+        [HttpPost]
         public ActionResult Verify(Account acc)
         {
             connectionString();
             con.Open();
-            
-            con.Close();
-            return View();
+            com.Connection = con;
+            com.CommandText = "select * from tbl_login where username='" + acc.Name + "' and password='" + acc.Password + "'";
+            dr = com.ExecuteReader();
+
+            if (dr.Read())
+            {
+                con.Close();
+                return View("Create");
+            }
+            else
+            {
+                con.Close();
+                return View("Error");
+            }
+
         }
     }
 }
